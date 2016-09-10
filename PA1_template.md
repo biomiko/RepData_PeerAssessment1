@@ -1,41 +1,65 @@
-#Personal movement analysis
+# Reproducible Research: Peer Assessment 1
 
-```{r, include=FALSE}
-setwd("D:/LAB/Conference/Coursea/DATA_SCIENCE/5_Reproducible_research/Week2")
-
-```
 
 ##Load packages.
-```{r, results='hide', message=FALSE, warning=FALSE}
+
+```r
 library(dplyr)
 library(lattice)
 library(mice)
-
 ```
 
-##1. Code for reading in the dataset and/or processing the data
-```{r}
-activity <- read.csv(unzip("repdata_data_activity.zip"))
+
+## Loading and preprocessing the data
+
+```r
+activity <- read.csv(unzip("activity.zip"))
 activity_day <- activity %>%
       group_by(date) %>%
       summarise(steps = sum(steps, na.rm=TRUE))
 ```
 
+
+## What is mean total number of steps taken per day?
+
+
 ##2. Histogram of the total number of steps taken each day
-```{r}
+
+```r
 hist(activity_day$steps)
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-3-1.png)<!-- -->
+
 ##3. Mean and median number of steps taken each day
-```{r}
+
+```r
 mean_meadian <- activity %>%
     group_by(date) %>%
     summarise(mean = mean(steps, na.rm=TRUE), median=median(steps, na.rm=TRUE))
 mean_meadian
 ```
 
-##4. Time series plot of the average number of steps taken
-```{r}
+```
+## # A tibble: 61 x 3
+##          date     mean median
+##        <fctr>    <dbl>  <dbl>
+## 1  2012-10-01      NaN     NA
+## 2  2012-10-02  0.43750      0
+## 3  2012-10-03 39.41667      0
+## 4  2012-10-04 42.06944      0
+## 5  2012-10-05 46.15972      0
+## 6  2012-10-06 53.54167      0
+## 7  2012-10-07 38.24653      0
+## 8  2012-10-08      NaN     NA
+## 9  2012-10-09 44.48264      0
+## 10 2012-10-10 34.37500      0
+## # ... with 51 more rows
+```
+
+## What is the average daily activity pattern?
+
+```r
 activity_interval <- activity %>%
       group_by(interval) %>%
       summarise(mean_steps = mean(steps, na.rm=TRUE))
@@ -43,30 +67,57 @@ activity_interval <- activity %>%
 with(activity_interval, plot(interval, mean_steps, type="l"))
 ```
 
-##5. The 5-minute interval that, on average, contains the maximum number of steps
-```{r}
+![](PA1_template_files/figure-html/unnamed-chunk-5-1.png)<!-- -->
+
+```r
 activity[which(activity$steps == max(activity$steps, na.rm=TRUE)),]
 ```
 
-##6. Code to describe and show a strategy for imputing missing data
-```{r}
-sum(is.na(activity$steps))
-imputed_Data <- mice(activity, m=2, maxit = 2, method = 'pmm', seed = 500)
-activity_complete <- complete(imputed_Data,2)
+```
+##       steps       date interval
+## 16492   806 2012-11-27      615
 ```
 
-##7. Histogram of the total number of steps taken each day after missing values are imputed
-```{r}
+## Imputing missing values
+
+
+```r
+sum(is.na(activity$steps))
+```
+
+```
+## [1] 2304
+```
+
+```r
+imputed_Data <- mice(activity, m=2, maxit = 2, method = 'pmm', seed = 500)
+```
+
+```
+## 
+##  iter imp variable
+##   1   1  steps
+##   1   2  steps
+##   2   1  steps
+##   2   2  steps
+```
+
+```r
+activity_complete <- complete(imputed_Data,2)
+
 activity_day_complete <- activity_complete %>%
       group_by(date) %>%
       summarise(steps = sum(steps))
 
 hist(activity_day_complete$steps)
-
 ```
 
-##8. Panel plot comparing the average number of steps taken per 5-minute interval across weekdays and weekends
-```{r}
+![](PA1_template_files/figure-html/unnamed-chunk-6-1.png)<!-- -->
+
+## Are there differences in activity patterns between weekdays and weekends?
+
+
+```r
 activity_complete$weekdays <- weekdays(as.Date(activity_complete$date,'%Y-%m-%d'))
 activity_complete$day <- "weekday"
 activity_complete$day[activity_complete$weekdays %in% c("Saturday", "Sunday")] <- "weekend"
@@ -76,3 +127,5 @@ activity_interval_complete <- activity_complete %>%
       summarise(steps = mean(steps))
 xyplot (steps~interval | day, data=activity_interval_complete, type="l")
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-7-1.png)<!-- -->

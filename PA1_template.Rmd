@@ -6,20 +6,76 @@ output:
 ---
 
 
-## Loading and preprocessing the data
+##Load packages.
+```{r, results='hide', message=FALSE, warning=FALSE}
+library(dplyr)
+library(lattice)
+library(mice)
 
+```
+
+
+## Loading and preprocessing the data
+```{r}
+activity <- read.csv(unzip("activity.zip"))
+activity_day <- activity %>%
+      group_by(date) %>%
+      summarise(steps = sum(steps, na.rm=TRUE))
+```
 
 
 ## What is mean total number of steps taken per day?
 
 
+##2. Histogram of the total number of steps taken each day
+```{r}
+hist(activity_day$steps)
+```
+
+##3. Mean and median number of steps taken each day
+```{r}
+mean_meadian <- activity %>%
+    group_by(date) %>%
+    summarise(mean = mean(steps, na.rm=TRUE), median=median(steps, na.rm=TRUE))
+mean_meadian
+```
 
 ## What is the average daily activity pattern?
+```{r}
+activity_interval <- activity %>%
+      group_by(interval) %>%
+      summarise(mean_steps = mean(steps, na.rm=TRUE))
 
+with(activity_interval, plot(interval, mean_steps, type="l"))
 
+activity[which(activity$steps == max(activity$steps, na.rm=TRUE)),]
+
+```
 
 ## Imputing missing values
 
+```{r}
+sum(is.na(activity$steps))
+imputed_Data <- mice(activity, m=2, maxit = 2, method = 'pmm', seed = 500)
+activity_complete <- complete(imputed_Data,2)
 
+activity_day_complete <- activity_complete %>%
+      group_by(date) %>%
+      summarise(steps = sum(steps))
+
+hist(activity_day_complete$steps)
+
+```
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+```{r}
+activity_complete$weekdays <- weekdays(as.Date(activity_complete$date,'%Y-%m-%d'))
+activity_complete$day <- "weekday"
+activity_complete$day[activity_complete$weekdays %in% c("Saturday", "Sunday")] <- "weekend"
+
+activity_interval_complete <- activity_complete %>%
+      group_by(interval, day) %>%
+      summarise(steps = mean(steps))
+xyplot (steps~interval | day, data=activity_interval_complete, type="l")
+```
