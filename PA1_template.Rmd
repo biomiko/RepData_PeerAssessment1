@@ -28,12 +28,12 @@ activity_day <- activity %>%
 
 
 ##2. Histogram of the total number of steps taken each day
-```{r}
-hist(activity_day$steps)
+```{r barplot}
+barplot(activity_day$steps, main = "Number of steps by days", ylab = "Number of steps")
 ```
 
 ##3. Mean and median number of steps taken each day
-```{r}
+```{r mean}
 mean_meadian <- activity %>%
     group_by(date) %>%
     summarise(mean = mean(steps, na.rm=TRUE), median=median(steps, na.rm=TRUE))
@@ -41,7 +41,7 @@ mean_meadian
 ```
 
 ## What is the average daily activity pattern?
-```{r}
+```{r daily pattern}
 activity_interval <- activity %>%
       group_by(interval) %>%
       summarise(mean_steps = mean(steps, na.rm=TRUE))
@@ -54,7 +54,7 @@ activity[which(activity$steps == max(activity$steps, na.rm=TRUE)),]
 
 ## Imputing missing values
 
-```{r}
+```{r imputation}
 sum(is.na(activity$steps))
 imputed_Data <- mice(activity, m=2, maxit = 2, method = 'pmm', seed = 500)
 activity_complete <- complete(imputed_Data,2)
@@ -63,13 +63,13 @@ activity_day_complete <- activity_complete %>%
       group_by(date) %>%
       summarise(steps = sum(steps))
 
-hist(activity_day_complete$steps)
+barplot(activity_day_complete$steps, main = "Total number of steps by days (with no missing values)", ylab = "Number of steps")
 
 ```
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
-```{r}
+```{r weekdays vs weekends}
 activity_complete$weekdays <- weekdays(as.Date(activity_complete$date,'%Y-%m-%d'))
 activity_complete$day <- "weekday"
 activity_complete$day[activity_complete$weekdays %in% c("Saturday", "Sunday")] <- "weekend"

@@ -26,10 +26,10 @@ activity_day <- activity %>%
 ##2. Histogram of the total number of steps taken each day
 
 ```r
-hist(activity_day$steps)
+barplot(activity_day$steps, main = "Number of steps by days", ylab = "Number of steps")
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-3-1.png)<!-- -->
+![](PA1_template_files/figure-html/barplot-1.png)<!-- -->
 
 ##3. Mean and median number of steps taken each day
 
@@ -67,7 +67,7 @@ activity_interval <- activity %>%
 with(activity_interval, plot(interval, mean_steps, type="l"))
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-5-1.png)<!-- -->
+![](PA1_template_files/figure-html/daily pattern-1.png)<!-- -->
 
 ```r
 activity[which(activity$steps == max(activity$steps, na.rm=TRUE)),]
@@ -109,10 +109,10 @@ activity_day_complete <- activity_complete %>%
       group_by(date) %>%
       summarise(steps = sum(steps))
 
-hist(activity_day_complete$steps)
+barplot(activity_day_complete$steps, main = "Total number of steps by days (with no missing values)", ylab = "Number of steps")
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-6-1.png)<!-- -->
+![](PA1_template_files/figure-html/imputation-1.png)<!-- -->
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
@@ -128,4 +128,4 @@ activity_interval_complete <- activity_complete %>%
 xyplot (steps~interval | day, data=activity_interval_complete, type="l")
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-7-1.png)<!-- -->
+![](PA1_template_files/figure-html/weekdays vs weekends-1.png)<!-- -->
